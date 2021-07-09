@@ -14,6 +14,16 @@ CONTAINER_ID=$1
 CONTAINER_TAR=""$CONTAINER_ID".tar"
 GREP_ID=`docker ps | grep "$CONTAINER_ID"`
 
+function umount_arr() {
+    for i in ${mount_arr[@]}
+    do
+    	if grep -qs "$i" /proc/mounts; then
+	    echo -e "Unmounting \033[0;34m"$i"\033[0m."
+	    umount -l ${PWD}/$i
+	fi
+    done
+}
+
 if [ -z "$GREP_ID" ]; then
     echo "Container does not exist!" >&2
     exit 1
@@ -42,9 +52,6 @@ chroot .
 mount -a
 su -
 
-for i in ${mount_arr[@]}
-do
-    echo -e "Unmounting \033[0;34m"$i"\033[0m."
-    umount -l ${PWD}/$i
-done
+umount_arr
+
 echo -e "\033[0;32mOK\033[0m"
